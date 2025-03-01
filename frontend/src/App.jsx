@@ -26,6 +26,8 @@ function App() {
           <Route path="/create" element={<Create />} />
           <Route path="/video/:id" element={<><Navbar/><VideoDetail/></>} />
           <Route path="/Profile" element={<><Navbar/><Profile/></>} />
+          <Route path="/admindashboard" element={<><Navbar/><Admin/></>} />
+
 
           {/* Add additional routes as needed */}
           {/* <Route path="/dashboard" element={<div className="p-8">Dashboard Page</div>} />
