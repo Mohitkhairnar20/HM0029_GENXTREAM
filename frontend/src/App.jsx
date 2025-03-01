@@ -8,6 +8,7 @@ import Create from './components/Create';
 import Main from './components/Main';
 import VideoDetail from './components/VideoDetail';
 import Admin from './components/Admin';
+import Profile from './components/Profile';
 // import Navbar from './Navbar';
 
 function App() {
@@ -24,7 +25,8 @@ function App() {
           <Route path="/dashboard" element={<><Navbar /><Main/></>} />
           <Route path="/create" element={<Create />} />
           <Route path="/video/:id" element={<><Navbar/><VideoDetail/></>} />
-          <Route path="/admindashboard" element={<><Navbar/><Admin/></>} />
+          <Route path="/Profile" element={<><Navbar/><Profile/></>} />
+
           {/* Add additional routes as needed */}
           {/* <Route path="/dashboard" element={<div className="p-8">Dashboard Page</div>} />
           <Route path="/sign-in" element={<div className="p-8">Sign In Page</div>} />

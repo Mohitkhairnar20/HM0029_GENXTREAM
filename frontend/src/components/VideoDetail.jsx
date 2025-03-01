@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Play, Eye, Calendar, Tag, ThumbsUp, Share2, Flag } from 'lucide-react';
 import axios from 'axios';
@@ -10,6 +10,17 @@ const VideoDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  
+  // Refs to keep track of video playback
+  const videoRef = useRef(null);
+  const watchStartTime = useRef(null);
+  const watchDuration = useRef(0);
+  const lastUpdateTime = useRef(null);
+  const intervalRef = useRef(null);
+  
+  // Assume userId is stored in localStorage or session after login
+  // In a real app, you might get this from a context or state management system
+  const userId = localStorage.getItem('userId') || '65f1a2b3c4d5e6f7g8h9i0j1'; // Fallback to a placeholder ID
 
   // Format date to be more readable
   const formatDate = (dateString) => {
@@ -38,25 +49,123 @@ const VideoDetail = () => {
 
     return () => {
       document.title = 'Video Platform';
+      // Save watch data when component unmounts
+      saveWatchData();
+      clearInterval(intervalRef.current);
     };
   }, [id]);
 
+  // Calculate percent completed based on video's current time and duration
+  const calculatePercentCompleted = () => {
+    if (!videoRef.current) return 0;
+    
+    const { currentTime, duration } = videoRef.current;
+    if (!duration) return 0;
+    
+    return Math.floor((currentTime / duration) * 100);
+  };
+
+  // Send periodic updates to the server about watch progress
+  const startPeriodicUpdates = () => {
+    // Update every 30 seconds
+    intervalRef.current = setInterval(() => {
+      if (isPlaying) {
+        updateWatchProgress();
+      }
+    }, 30000); // 30 seconds
+  };
+
+  // Update watch progress
+  const updateWatchProgress = async () => {
+    if (!videoRef.current || !isPlaying) return;
+
+    const now = Date.now();
+    const elapsedSinceLastUpdate = lastUpdateTime.current ? 
+      (now - lastUpdateTime.current) / 1000 : 0;
+    
+    // Only update if more than 5 seconds have passed since last update
+    if (elapsedSinceLastUpdate < 5) return;
+
+    watchDuration.current += elapsedSinceLastUpdate;
+    lastUpdateTime.current = now;
+
+    const percentCompleted = calculatePercentCompleted();
+
+    try {
+      await axios.post(`http://localhost:3000/api/user-journey/progress`, {
+        videoId: id,
+        watchDuration: Math.floor(watchDuration.current),
+        percentCompleted,
+        category: video.category,
+        userId // Include userId in the request
+      });
+    } catch (err) {
+      console.error('Error updating watch progress:', err);
+    }
+  };
+
+  // Save watch data when video ends or component unmounts
+  const saveWatchData = async () => {
+    if (!videoRef.current || !id || !video) return;
+    
+    const percentCompleted = calculatePercentCompleted();
+    
+    try {
+      await axios.post(`http://localhost:3000/api/user-journey/complete`, {
+        videoId: id,
+        watchDuration: Math.floor(watchDuration.current),
+        percentCompleted,
+        category: video.category,
+        userId // Include userId in the request
+      });
+    } catch (err) {
+      console.error('Error saving watch data:', err);
+    }
+  };
+
   const handleBack = () => {
+    saveWatchData();
     navigate('/dashboard');
   };
 
   const handleVideoPlay = () => {
-    if (!isPlaying) {
-      setIsPlaying(true);
-      
-      // Increment view count
-      fetch(`http://localhost:3000/api/videos/${id}/views`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }).catch(err => console.error('Error updating view count:', err));
+    setIsPlaying(true);
+    
+    // Set watch start time if not already set
+    if (!watchStartTime.current) {
+      watchStartTime.current = Date.now();
+      lastUpdateTime.current = Date.now();
     }
+    
+    // Start periodic updates
+    if (!intervalRef.current) {
+      startPeriodicUpdates();
+    }
+    
+    // Increment view count
+    fetch(`http://localhost:3000/api/videos/${id}/views`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).catch(err => console.error('Error updating view count:', err));
+  };
+
+  const handleVideoPause = () => {
+    setIsPlaying(false);
+    
+    // Update watch duration
+    if (watchStartTime.current) {
+      const now = Date.now();
+      const elapsedSinceLastUpdate = (now - lastUpdateTime.current) / 1000;
+      watchDuration.current += elapsedSinceLastUpdate;
+      lastUpdateTime.current = now;
+    }
+  };
+
+  const handleVideoEnded = () => {
+    setIsPlaying(false);
+    saveWatchData();
   };
 
   if (loading) {
@@ -99,11 +208,14 @@ const VideoDetail = () => {
       <div className="bg-black rounded-xl overflow-hidden shadow-xl mb-8">
         <div className="aspect-video w-full">
           <video
+            ref={videoRef}
             src={video.videoUrl}
             controls
             poster={video.thumbnail}
             className="w-full h-full object-contain"
             onPlay={handleVideoPlay}
+            onPause={handleVideoPause}
+            onEnded={handleVideoEnded}
           >
             Your browser does not support the video tag.
           </video>

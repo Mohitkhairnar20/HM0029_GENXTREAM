@@ -30,7 +30,7 @@ const Signin = () => {
       setError('Email and password are required');
       return;
     }
-
+  
     setLoading(true);
     
     try {
@@ -57,6 +57,7 @@ const Signin = () => {
       if (data.token) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('role', formData.role); // Changed from userType to role
+        localStorage.setItem('userId', data.userId); // Added userId to localStorage
         
         if (formData.role === 'admin') {
           navigate('/admindashboard');

@@ -3,7 +3,7 @@ const multer = require("multer");
 const cloudinary = require("../config/cloudinary");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const Video = require("../models/video");
-
+const JourneyTrackingService = require('../services/JourneyTracking');
 const router = express.Router();
 
 // Configure Multer storage with Cloudinary

@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 
 const authRoutes = require("./routes/authRoute")
 const videoRoutes = require("./routes/videoroute.js");
-
+const userJourneyRoutes = require('./routes/userjourney');
 const app = express();
 
 // Middleware
@@ -24,6 +24,7 @@ mongoose.connect(url, {
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/videos", videoRoutes);
+app.use('/api/user-journey', userJourneyRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
