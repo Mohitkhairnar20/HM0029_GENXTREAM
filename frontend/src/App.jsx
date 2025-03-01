@@ -9,6 +9,7 @@ import Main from './components/Main';
 import VideoDetail from './components/VideoDetail';
 import Admin from './components/Admin';
 import Profile from './components/Profile';
+import Chatbot from './components/Chatbot';
 // import Navbar from './Navbar';
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
           <Route path="/video/:id" element={<><Navbar/><VideoDetail/></>} />
           <Route path="/Profile" element={<><Navbar/><Profile/></>} />
           <Route path="/admindashboard" element={<><Navbar/><Admin/></>} />
+          <Route path="/chatbot" element={<><Navbar/><Chatbot/></>} />
 
 
           {/* Add additional routes as needed */}

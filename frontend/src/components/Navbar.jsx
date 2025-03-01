@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { LogOut, Video, Plus, Menu, X, User } from 'lucide-react';
+import { LogOut, Video, Plus, Menu, X, User, MessageCircleQuestion } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -19,13 +20,15 @@ const Navbar = () => {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = () => {
-      setShowProfileDropdown(false);
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.profile-dropdown-container')) {
+        setShowProfileDropdown(false);
+      }
     };
     
-    document.addEventListener('click', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
   
@@ -53,179 +56,371 @@ const Navbar = () => {
     setShowProfileDropdown(false);
   };
 
+  const handleDoubtsClick = () => {
+    navigate('/chatbot');
+    setIsMobileMenuOpen(false);
+  };
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
   
+  // Animation variants
+  const navbarVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.3 }
+    }
+  };
+  
+  const buttonVariants = {
+    rest: { scale: 1 },
+    hover: { 
+      scale: 1.05,
+      transition: { type: "spring", stiffness: 400, damping: 10 }
+    },
+    tap: { scale: 0.95 }
+  };
+  
+  const dropdownVariants = {
+    hidden: { opacity: 0, y: -10, scale: 0.95 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: { 
+        type: "spring", 
+        stiffness: 400, 
+        damping: 10 
+      }
+    }
+  };
+  
+  const mobileMenuVariants = {
+    hidden: { opacity: 0, height: 0 },
+    visible: { 
+      opacity: 1, 
+      height: "auto",
+      transition: { 
+        duration: 0.3,
+        staggerChildren: 0.1,
+        when: "beforeChildren"
+      }
+    }
+  };
+  
+  const mobileItemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: { 
+      opacity: 1, 
+      x: 0,
+      transition: { type: "spring", stiffness: 300, damping: 20 }
+    }
+  };
+  
+  const logoVariants = {
+    rest: { scale: 1 },
+    hover: { 
+      scale: 1.05,
+      transition: { 
+        type: "spring", 
+        stiffness: 400 
+      }
+    }
+  };
+  
   return (
-    <nav className="bg-gradient-to-r from-indigo-600 to-purple-700 shadow-xl">
+    <motion.nav 
+      className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-700 shadow-xl"
+      initial="hidden"
+      animate="visible"
+      variants={navbarVariants}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Left - Website Name and Logo */}
-          <div className="flex items-center">
+          <motion.div 
+            className="flex items-center"
+            variants={logoVariants}
+            initial="rest"
+            whileHover="hover"
+          >
             <div 
               className="flex-shrink-0 cursor-pointer" 
               onClick={() => navigate('/dashboard')}
             >
               <h1 className="text-2xl font-bold text-white flex items-center">
-                <Video className="w-6 h-6 mr-2 text-blue-300" />
+                <motion.div
+                  whileHover={{ rotate: 360 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <Video className="w-6 h-6 mr-2 text-blue-300" />
+                </motion.div>
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-cyan-100 font-extrabold">
                   EduTech
                 </span>
               </h1>
             </div>
-          </div>
+          </motion.div>
           
           {/* Right - Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-3">
             {isLoggedIn ? (
               <div className="flex items-center space-x-3">
+                {/* Doubts button */}
+                <motion.button 
+                  className="flex items-center px-4 py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-white font-medium rounded-lg transition-all shadow-md"
+                  onClick={handleDoubtsClick}
+                  variants={buttonVariants}
+                  initial="rest"
+                  whileHover="hover"
+                  whileTap="tap"
+                >
+                  <MessageCircleQuestion className="w-4 h-4 mr-2" />
+                  Doubts
+                </motion.button>
+                
                 {/* Show Create button only for non-admin users */}
                 {!isAdmin && (
-                  <button 
-                    className="flex items-center px-4 py-2 bg-gradient-to-r from-green-400 to-emerald-500 text-white font-medium rounded-lg hover:from-green-500 hover:to-emerald-600 transition-all duration-300 shadow-md transform hover:scale-105"
+                  <motion.button 
+                    className="flex items-center px-4 py-2 bg-gradient-to-r from-green-400 to-emerald-500 text-white font-medium rounded-lg transition-all shadow-md"
                     onClick={handleCreateClick}
+                    variants={buttonVariants}
+                    initial="rest"
+                    whileHover="hover"
+                    whileTap="tap"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Create
-                  </button>
+                  </motion.button>
                 )}
                 
                 {/* Profile Icon */}
-                <div className="relative">
-                  <button 
+                <div className="relative profile-dropdown-container">
+                  <motion.button 
                     className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-all flex items-center justify-center"
                     onClick={handleProfileClick}
+                    whileHover={{ 
+                      backgroundColor: "rgba(255, 255, 255, 0.2)",
+                      scale: 1.1
+                    }}
+                    whileTap={{ scale: 0.95 }}
                   >
                     <User className="w-5 h-5 text-white" />
-                  </button>
+                  </motion.button>
                   
                   {/* Profile Dropdown */}
-                  {showProfileDropdown && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-10">
-                      <button 
-                        className="w-full px-4 py-2 text-gray-700 hover:bg-gray-100 text-left flex items-center"
-                        onClick={navigateToProfile}
+                  <AnimatePresence>
+                    {showProfileDropdown && (
+                      <motion.div 
+                        className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-10 overflow-hidden"
+                        variants={dropdownVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="hidden"
                       >
-                        <User className="w-4 h-4 mr-2 text-gray-500" />
-                        Profile
-                      </button>
-                      <button 
-                        className="w-full px-4 py-2 text-red-600 hover:bg-gray-100 text-left flex items-center"
-                        onClick={handleLogout}
-                      >
-                        <LogOut className="w-4 h-4 mr-2 text-red-500" />
-                        Logout
-                      </button>
-                    </div>
-                  )}
+                        <motion.button 
+                          className="w-full px-4 py-2 text-gray-700 hover:bg-gray-100 text-left flex items-center"
+                          onClick={navigateToProfile}
+                          whileHover={{ backgroundColor: "rgba(243, 244, 246, 1)" }}
+                        >
+                          <User className="w-4 h-4 mr-2 text-gray-500" />
+                          Profile
+                        </motion.button>
+                        <motion.button 
+                          className="w-full px-4 py-2 text-red-600 hover:bg-gray-100 text-left flex items-center"
+                          onClick={handleLogout}
+                          whileHover={{ backgroundColor: "rgba(243, 244, 246, 1)" }}
+                        >
+                          <LogOut className="w-4 h-4 mr-2 text-red-500" />
+                          Logout
+                        </motion.button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
             ) : (
               <div className="flex items-center space-x-3">
-                <button 
+                {/* Doubts button for logged out users */}
+                <motion.button 
+                  className="flex items-center px-4 py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-white font-medium rounded-lg transition-all shadow-md"
+                  onClick={handleDoubtsClick}
+                  variants={buttonVariants}
+                  initial="rest"
+                  whileHover="hover"
+                  whileTap="tap"
+                >
+                  <MessageCircleQuestion className="w-4 h-4 mr-2" />
+                  Doubts
+                </motion.button>
+                
+                <motion.button 
                   className="px-5 py-2 text-white font-medium hover:bg-white/10 rounded-lg transition-all"
                   onClick={() => navigate('/signin')}
+                  whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+                  whileTap={{ scale: 0.97 }}
                 >
                   Sign In
-                </button>
-                <button 
-                  className="px-5 py-2 bg-gradient-to-r from-blue-400 to-blue-500 text-white font-medium rounded-lg hover:from-blue-500 hover:to-blue-600 transition-all shadow-md transform hover:scale-105"
+                </motion.button>
+                <motion.button 
+                  className="px-5 py-2 bg-gradient-to-r from-blue-400 to-blue-500 text-white font-medium rounded-lg transition-all shadow-md"
                   onClick={() => navigate('/signup')}
+                  variants={buttonVariants}
+                  initial="rest"
+                  whileHover="hover"
+                  whileTap="tap"
                 >
                   Sign Up
-                </button>
+                </motion.button>
               </div>
             )}
           </div>
           
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
-            <button
+            <motion.button
               onClick={toggleMobileMenu}
               className="text-white hover:text-gray-200 focus:outline-none"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
             >
-              {isMobileMenuOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Menu className="w-6 h-6" />
-              )}
-            </button>
+              <AnimatePresence mode="wait">
+                {isMobileMenuOpen ? (
+                  <motion.div
+                    key="close"
+                    initial={{ rotate: -90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: 90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <X className="w-6 h-6" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="menu"
+                    initial={{ rotate: 90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: -90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Menu className="w-6 h-6" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.button>
           </div>
         </div>
       </div>
       
       {/* Mobile menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden bg-indigo-800/90 backdrop-blur-sm shadow-inner px-2 pt-2 pb-4 rounded-b-lg">
-          <div className="px-2 pt-2 pb-3 space-y-3">
-            {/* Mobile Auth Buttons */}
-            <div className="space-y-2">
-              {isLoggedIn ? (
-                <>
-                  {/* Profile Option */}
-                  <button 
-                    className="flex items-center w-full px-4 py-3 text-white font-medium hover:bg-white/10 rounded-lg transition-colors"
-                    onClick={() => {
-                      navigate('/profile');
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    <User className="w-4 h-4 mr-2" />
-                    Profile
-                  </button>
-                
-                  {/* Show Create button only for non-admin users */}
-                  {!isAdmin && (
-                    <button 
-                      className="flex items-center w-full px-4 py-3 bg-gradient-to-r from-green-400 to-emerald-500 text-white font-medium rounded-lg hover:from-green-500 hover:to-emerald-600 transition-colors"
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div 
+            className="md:hidden bg-indigo-800/90 backdrop-blur-sm shadow-inner px-2 pt-2 pb-4 rounded-b-lg"
+            variants={mobileMenuVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+          >
+            <div className="px-2 pt-2 pb-3 space-y-3">
+              {/* Mobile Auth Buttons */}
+              <div className="space-y-2">
+                {isLoggedIn ? (
+                  <>
+                    {/* Profile Option */}
+                    <motion.button 
+                      className="flex items-center w-full px-4 py-3 text-white font-medium hover:bg-white/10 rounded-lg transition-colors"
                       onClick={() => {
-                        handleCreateClick();
+                        navigate('/profile');
                         setIsMobileMenuOpen(false);
                       }}
+                      variants={mobileItemVariants}
+                      whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
                     >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create
-                    </button>
-                  )}
-                  <button 
-                    className="flex items-center w-full px-4 py-3 bg-gradient-to-r from-red-400 to-red-500 text-white font-medium rounded-lg hover:from-red-500 hover:to-red-600 transition-colors"
-                    onClick={() => {
-                      handleLogout();
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button 
-                    className="w-full px-4 py-3 text-white font-medium hover:bg-white/10 rounded-lg transition-colors"
-                    onClick={() => {
-                      navigate('/signin');
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    Sign In
-                  </button>
-                  <button 
-                    className="w-full px-4 py-3 bg-gradient-to-r from-blue-400 to-blue-500 text-white font-medium rounded-lg hover:from-blue-500 hover:to-blue-600 transition-colors"
-                    onClick={() => {
-                      navigate('/signup');
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    Sign Up
-                  </button>
-                </>
-              )}
+                      <User className="w-4 h-4 mr-2" />
+                      Profile
+                    </motion.button>
+                    
+                    {/* Doubts button */}
+                    <motion.button 
+                      className="flex items-center w-full px-4 py-3 bg-gradient-to-r from-amber-400 to-amber-500 text-white font-medium rounded-lg hover:from-amber-500 hover:to-amber-600 transition-colors"
+                      onClick={handleDoubtsClick}
+                      variants={mobileItemVariants}
+                    >
+                      <MessageCircleQuestion className="w-4 h-4 mr-2" />
+                      Doubts
+                    </motion.button>
+                  
+                    {/* Show Create button only for non-admin users */}
+                    {!isAdmin && (
+                      <motion.button 
+                        className="flex items-center w-full px-4 py-3 bg-gradient-to-r from-green-400 to-emerald-500 text-white font-medium rounded-lg hover:from-green-500 hover:to-emerald-600 transition-colors"
+                        onClick={() => {
+                          handleCreateClick();
+                          setIsMobileMenuOpen(false);
+                        }}
+                        variants={mobileItemVariants}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create
+                      </motion.button>
+                    )}
+                    <motion.button 
+                      className="flex items-center w-full px-4 py-3 bg-gradient-to-r from-red-400 to-red-500 text-white font-medium rounded-lg hover:from-red-500 hover:to-red-600 transition-colors"
+                      onClick={() => {
+                        handleLogout();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      variants={mobileItemVariants}
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Logout
+                    </motion.button>
+                  </>
+                ) : (
+                  <>
+                    {/* Doubts button for logged out users */}
+                    <motion.button 
+                      className="flex items-center w-full px-4 py-3 bg-gradient-to-r from-amber-400 to-amber-500 text-white font-medium rounded-lg hover:from-amber-500 hover:to-amber-600 transition-colors"
+                      onClick={handleDoubtsClick}
+                      variants={mobileItemVariants}
+                    >
+                      <MessageCircleQuestion className="w-4 h-4 mr-2" />
+                      Doubts
+                    </motion.button>
+                    
+                    <motion.button 
+                      className="w-full px-4 py-3 text-white font-medium hover:bg-white/10 rounded-lg transition-colors"
+                      onClick={() => {
+                        navigate('/signin');
+                        setIsMobileMenuOpen(false);
+                      }}
+                      variants={mobileItemVariants}
+                      whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+                    >
+                      Sign In
+                    </motion.button>
+                    <motion.button 
+                      className="w-full px-4 py-3 bg-gradient-to-r from-blue-400 to-blue-500 text-white font-medium rounded-lg hover:from-blue-500 hover:to-blue-600 transition-colors"
+                      onClick={() => {
+                        navigate('/signup');
+                        setIsMobileMenuOpen(false);
+                      }}
+                      variants={mobileItemVariants}
+                    >
+                      Sign Up
+                    </motion.button>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
-    </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.nav>
   );
 };
 
