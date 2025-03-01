@@ -249,22 +249,7 @@ const VideoDetail = () => {
         </div>
         
         {/* Action buttons */}
-        <div className="flex flex-wrap gap-4 mb-6">
-          <button className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors">
-            <ThumbsUp size={18} className="mr-2" />
-            <span>Like</span>
-          </button>
-          
-          <button className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors">
-            <Share2 size={18} className="mr-2" />
-            <span>Share</span>
-          </button>
-          
-          <button className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors">
-            <Flag size={18} className="mr-2" />
-            <span>Report</span>
-          </button>
-        </div>
+      
         
         {/* Divider */}
         <hr className="my-6 border-gray-200" />

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Upload, Video, X, Check, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+// import { updateCategoryData } from '../../../backend/services/JourneyTracking';
 
 const Create = () => {
   const navigate = useNavigate();
@@ -66,7 +67,9 @@ const Create = () => {
   };
 
   // Form submission
-  const handleSubmit = async (e) => {
+  // In your Create.js component, update the handleSubmit function like this:
+
+const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validation
@@ -105,10 +108,13 @@ const Create = () => {
     
     // Create FormData for multipart/form-data submission
     const uploadData = new FormData();
-    uploadData.append('title', formData.title);
-    uploadData.append('description', formData.description);
-    uploadData.append('type', formData.type);
-    uploadData.append('category', formData.category);
+    uploadData.append('title', formData.title.toString());
+    uploadData.append('description', formData.description.toString());
+    uploadData.append('type', formData.type.toString());
+    uploadData.append('category', formData.category.toString());
+    
+    
+    // Make sure fieldnames match exactly what the server expects
     uploadData.append('thumbnail', thumbnail);
     uploadData.append('video', video);
     
@@ -118,6 +124,11 @@ const Create = () => {
         setError('You must be logged in to upload videos');
         setIsUploading(false);
         return;
+      }
+      
+      // Log FormData entries for debugging (optional)
+      for (let pair of uploadData.entries()) {
+        console.log(pair[0], pair[1]);
       }
       
       const response = await axios.post('http://localhost:3000/api/videos/upload', uploadData, {
@@ -137,7 +148,14 @@ const Create = () => {
       
     } catch (error) {
       setIsUploading(false);
-      setError(error.response?.data?.message || 'Error uploading video. Please try again.');
+      console.error('Upload error:', error);
+      
+      // Better error handling
+      if (error.response && error.response.data) {
+        setError(error.response.data.message || 'Error uploading video. Please try again.');
+      } else {
+        setError('Network error or server unavailable. Please try again later.');
+      }
     }
   };
 

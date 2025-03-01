@@ -3,73 +3,114 @@ const multer = require("multer");
 const cloudinary = require("../config/cloudinary");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const Video = require("../models/video");
-const JourneyTrackingService = require('../services/JourneyTracking');
+// const JourneyTrackingService = require('../services/JourneyTracking');
 const router = express.Router();
 
 // Configure Multer storage with Cloudinary
 const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: async (req, file) => {
-    return {
-      folder: "videos",
-      resource_type: file.mimetype.startsWith("video") ? "video" : "image",
-    };
-  },
-});
-
-const upload = multer({ storage });
+    cloudinary: cloudinary,
+    params: async (req, file) => {
+      // Determine resource type based on fieldname and mimetype
+      const isVideo = file.fieldname === "video";
+      return {
+        folder: isVideo ? "videos" : "thumbnails",
+        resource_type: isVideo ? "video" : "image",
+        // Add size limits appropriate for your application
+        limits: isVideo ? { fileSize: 500 * 1024 * 1024 } : { fileSize: 5 * 1024 * 1024 }
+      };
+    },
+  });
+  const upload = multer({ 
+    storage,
+    limits: { fileSize: 500 * 1024 * 1024 }, // 500MB limit
+    fileFilter: (req, file, cb) => {
+      if (file.fieldname === "video") {
+        if (!file.mimetype.startsWith("video/")) {
+          return cb(new Error("Only video files are allowed for video upload"), false);
+        }
+      } else if (file.fieldname === "thumbnail") {
+        if (!file.mimetype.startsWith("image/")) {
+          return cb(new Error("Only image files are allowed for thumbnail"), false);
+        }
+      }
+      cb(null, true);
+    }
+  }).fields([
+    { name: "thumbnail", maxCount: 1 }, 
+    { name: "video", maxCount: 1 }
+  ]);
 
 // ============================
 // 1️⃣ Upload Video
 // ============================
-router.post(
-  "/upload",
-  upload.fields([{ name: "thumbnail" }, { name: "video" }]),
-  async (req, res) => {
+router.post("/upload", (req, res, next) => {
+    upload(req, res, function(err) {
+      if (err) {
+        console.error("Upload middleware error:", err);
+        return res.status(400).json({ message: `Upload error: ${err.message}` });
+      }
+      next();
+    });
+  }, async (req, res) => {
     try {
+      console.log("Handler started with body:", req.body);
+      console.log("Files received:", req.files);
+      
       const { title, description, type, category } = req.body;
-
+      
       // Validate required fields
       if (!title || !description || !type || !category) {
-        return res.status(400).json({ message: "Title, description, type, and category are required" });
+        return res.status(400).json({ 
+          message: "Missing required fields", 
+          details: { title, description, type, category } 
+        });
       }
-
-      // Validate type ENUM
-      const allowedTypes = ["Course", "Tutorial", "Lecture"];
-      if (!allowedTypes.includes(type)) {
-        return res.status(400).json({ message: "Invalid type. Allowed values: Course, Tutorial, Lecture" });
+      
+      // Validate files existence
+      if (!req.files || !req.files.thumbnail || !req.files.thumbnail[0] || 
+          !req.files.video || !req.files.video[0]) {
+        return res.status(400).json({ 
+          message: "Both thumbnail and video files are required",
+          filesReceived: req.files ? Object.keys(req.files) : "none"
+        });
       }
-
-      if (!req.files || !req.files["thumbnail"] || !req.files["video"]) {
-        return res.status(400).json({ message: "Thumbnail and video are required" });
-      }
-
-      // Cloudinary URLs
-      const thumbnailUrl = req.files["thumbnail"][0].path;
-      const videoUrl = req.files["video"][0].path;
-
-      // Save to database
+      
+      // Get file URLs
+      const thumbnailUrl = req.files.thumbnail[0].path;
+      const videoUrl = req.files.video[0].path;
+      
+      console.log("Creating new video with:", { 
+        title, description, type, category, thumbnailUrl, videoUrl 
+      });
+      
+      // Create and save video object
       const newVideo = new Video({
         title,
         description,
         thumbnail: thumbnailUrl,
         videoUrl: videoUrl,
         type,
-        category, // Added category
+        category,
         views: 0,
-        approved: false, // Default false
+        approved: false,
+        uploadedBy: req.user ? req.user.id : null // If using authentication
       });
-
-      await newVideo.save();
-
-      res.status(201).json({ message: "Video uploaded successfully, pending approval", video: newVideo });
+      
+      const savedVideo = await newVideo.save();
+      console.log("Video saved successfully:", savedVideo._id);
+      
+      res.status(201).json({ 
+        message: "Video uploaded successfully, pending approval", 
+        videoId: savedVideo._id 
+      });
     } catch (error) {
-      console.error("Upload Error:", error);
-      res.status(500).json({ message: "Internal Server Error" });
+      console.error("Upload handler error:", error);
+      res.status(500).json({ 
+        message: "Server error during video creation", 
+        error: error.message 
+      });
     }
-  }
-);
-
+  });
 // ============================
 // 2️⃣ Get Only Approved Videos
 // ============================
