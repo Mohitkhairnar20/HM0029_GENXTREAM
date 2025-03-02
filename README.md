@@ -1,3 +1,4 @@
+# [HM0029] [GenXstream]
 # Educational Video Platform
 
 Welcome to the Educational Video Platform, a web application designed to provide users with access to approved educational video content. This platform allows users to sign up, sign in (as either a regular user or admin), watch videos, track their viewing habits, and upload educational content for approval. It also includes a personalized dashboard with visual progress tracking and an educational chatbot powered by the Groq API for resolving doubts.
@@ -101,7 +102,8 @@ npm start or nodemon index.js
 - **Upload Content**: Submit educational videos for approval.
 - **Track Progress**: View your personalized dashboard with visual analytics.
 - **Ask Doubts**: Use the Groq-powered educational chatbot in the doubts section.
-
+## Video Url
+[Link to Demo Video](https://drive.google.com/drive/folders/1rkdSnmF3VWryMkqMr6M4FMrVtWRQtZEp?usp=sharing)
  ## Contributing
 Contributions are welcome! Please fork this repository, make your changes, and submit a pull request.
 
