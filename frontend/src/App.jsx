@@ -31,10 +31,7 @@ function App() {
           <Route path="/chatbot" element={<><Navbar/><Chatbot/></>} />
 
 
-          {/* Add additional routes as needed */}
-          {/* <Route path="/dashboard" element={<div className="p-8">Dashboard Page</div>} />
-          <Route path="/sign-in" element={<div className="p-8">Sign In Page</div>} />
-          <Route path="*" element={<div className="p-8">404 - Page Not Found</div>} /> */}
+          
         </Routes>
       </BrowserRouter>
    

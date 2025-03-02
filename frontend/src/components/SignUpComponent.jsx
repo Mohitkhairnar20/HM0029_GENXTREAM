@@ -58,7 +58,7 @@ const SignupComponent = () => {
       };
       
       // Make API request to your signup endpoint
-      const response = await fetch('https://hm0029-genxtream.onrender.com0/api/auth/signup', {
+      const response = await fetch('https://hm0029-genxtream.onrender.com/api/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
