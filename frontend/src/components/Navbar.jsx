@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { LogOut, Video, Plus, Menu, X, User, MessageCircleQuestion } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -35,6 +37,18 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
+    localStorage.removeItem('userId');
+    
+    // Show logout success toast
+    toast.success('Logged out successfully!', {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true
+    });
+    
     setIsLoggedIn(false);
     setIsAdmin(false);
     navigate('/');
@@ -138,6 +152,9 @@ const Navbar = () => {
       animate="visible"
       variants={navbarVariants}
     >
+      {/* ToastContainer for notifications */}
+      <ToastContainer />
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Left - Website Name and Logo */}
@@ -169,18 +186,20 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-3">
             {isLoggedIn ? (
               <div className="flex items-center space-x-3">
-                {/* Doubts button */}
-                <motion.button 
-                  className="flex items-center px-4 py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-white font-medium rounded-lg transition-all shadow-md"
-                  onClick={handleDoubtsClick}
-                  variants={buttonVariants}
-                  initial="rest"
-                  whileHover="hover"
-                  whileTap="tap"
-                >
-                  <MessageCircleQuestion className="w-4 h-4 mr-2" />
-                  Doubts
-                </motion.button>
+                {/* Doubts button - Only show for non-admin users */}
+                {!isAdmin && (
+                  <motion.button 
+                    className="flex items-center px-4 py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-white font-medium rounded-lg transition-all shadow-md"
+                    onClick={handleDoubtsClick}
+                    variants={buttonVariants}
+                    initial="rest"
+                    whileHover="hover"
+                    whileTap="tap"
+                  >
+                    <MessageCircleQuestion className="w-4 h-4 mr-2" />
+                    Doubts
+                  </motion.button>
+                )}
                 
                 {/* Show Create button only for non-admin users */}
                 {!isAdmin && (
@@ -197,23 +216,27 @@ const Navbar = () => {
                   </motion.button>
                 )}
                 
-                {/* Profile Icon */}
+                {/* Profile Icon - Only show dropdown for non-admin users */}
                 <div className="relative profile-dropdown-container">
                   <motion.button 
                     className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-all flex items-center justify-center"
-                    onClick={handleProfileClick}
+                    onClick={isAdmin ? handleLogout : handleProfileClick}
                     whileHover={{ 
                       backgroundColor: "rgba(255, 255, 255, 0.2)",
                       scale: 1.1
                     }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <User className="w-5 h-5 text-white" />
+                    {isAdmin ? (
+                      <LogOut className="w-5 h-5 text-white" />
+                    ) : (
+                      <User className="w-5 h-5 text-white" />
+                    )}
                   </motion.button>
                   
-                  {/* Profile Dropdown */}
+                  {/* Profile Dropdown - Only for non-admin users */}
                   <AnimatePresence>
-                    {showProfileDropdown && (
+                    {showProfileDropdown && !isAdmin && (
                       <motion.div 
                         className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-10 overflow-hidden"
                         variants={dropdownVariants}
@@ -330,43 +353,46 @@ const Navbar = () => {
               <div className="space-y-2">
                 {isLoggedIn ? (
                   <>
-                    {/* Profile Option */}
-                    <motion.button 
-                      className="flex items-center w-full px-4 py-3 text-white font-medium hover:bg-white/10 rounded-lg transition-colors"
-                      onClick={() => {
-                        navigate('/profile');
-                        setIsMobileMenuOpen(false);
-                      }}
-                      variants={mobileItemVariants}
-                      whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
-                    >
-                      <User className="w-4 h-4 mr-2" />
-                      Profile
-                    </motion.button>
-                    
-                    {/* Doubts button */}
-                    <motion.button 
-                      className="flex items-center w-full px-4 py-3 bg-gradient-to-r from-amber-400 to-amber-500 text-white font-medium rounded-lg hover:from-amber-500 hover:to-amber-600 transition-colors"
-                      onClick={handleDoubtsClick}
-                      variants={mobileItemVariants}
-                    >
-                      <MessageCircleQuestion className="w-4 h-4 mr-2" />
-                      Doubts
-                    </motion.button>
-                  
-                    {/* Show Create button only for non-admin users */}
+                    {/* Admin only sees logout option in mobile menu */}
                     {!isAdmin && (
-                      <motion.button 
-                        className="flex items-center w-full px-4 py-3 bg-gradient-to-r from-green-400 to-emerald-500 text-white font-medium rounded-lg hover:from-green-500 hover:to-emerald-600 transition-colors"
-                        onClick={() => {
-                          handleCreateClick();
-                          setIsMobileMenuOpen(false);
-                        }}
-                        variants={mobileItemVariants}
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Create
-                      </motion.button>
+                      <>
+                        {/* Profile Option - Only for non-admin */}
+                        <motion.button 
+                          className="flex items-center w-full px-4 py-3 text-white font-medium hover:bg-white/10 rounded-lg transition-colors"
+                          onClick={() => {
+                            navigate('/profile');
+                            setIsMobileMenuOpen(false);
+                          }}
+                          variants={mobileItemVariants}
+                          whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+                        >
+                          <User className="w-4 h-4 mr-2" />
+                          Profile
+                        </motion.button>
+                        
+                        {/* Doubts button - Only for non-admin */}
+                        <motion.button 
+                          className="flex items-center w-full px-4 py-3 bg-gradient-to-r from-amber-400 to-amber-500 text-white font-medium rounded-lg hover:from-amber-500 hover:to-amber-600 transition-colors"
+                          onClick={handleDoubtsClick}
+                          variants={mobileItemVariants}
+                        >
+                          <MessageCircleQuestion className="w-4 h-4 mr-2" />
+                          Doubts
+                        </motion.button>
+                      
+                        {/* Create button - Only for non-admin */}
+                        <motion.button 
+                          className="flex items-center w-full px-4 py-3 bg-gradient-to-r from-green-400 to-emerald-500 text-white font-medium rounded-lg hover:from-green-500 hover:to-emerald-600 transition-colors"
+                          onClick={() => {
+                            handleCreateClick();
+                            setIsMobileMenuOpen(false);
+                          }}
+                          variants={mobileItemVariants}
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create
+                        </motion.button>
+                      </>
                     )}
                     <motion.button 
                       className="flex items-center w-full px-4 py-3 bg-gradient-to-r from-red-400 to-red-500 text-white font-medium rounded-lg hover:from-red-500 hover:to-red-600 transition-colors"

@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Signin = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    role: 'user' // Changed from userType to role
+    role: 'user'
   });
   
   const [showPassword, setShowPassword] = useState(false);
@@ -37,7 +39,7 @@ const Signin = () => {
       const userData = {
         email: formData.email,
         password: formData.password,
-        role: formData.role // Changed from userType to role
+        role: formData.role
       };
       
       const response = await fetch('http://localhost:3000/api/auth/signin', {
@@ -56,14 +58,27 @@ const Signin = () => {
       
       if (data.token) {
         localStorage.setItem('token', data.token);
-        localStorage.setItem('role', formData.role); // Changed from userType to role
-        localStorage.setItem('userId', data.userId); // Added userId to localStorage
+        localStorage.setItem('role', formData.role);
+        localStorage.setItem('userId', data.userId);
         
-        if (formData.role === 'admin') {
-          navigate('/admindashboard');
-        } else {
-          navigate('/dashboard');
-        }
+        // Show success toast notification with react-toastify
+        toast.success('Sign in successful!', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        });
+        
+        // Navigate after showing the toast
+        setTimeout(() => {
+          if (formData.role === 'admin') {
+            navigate('/admindashboard');
+          } else {
+            navigate('/dashboard');
+          }
+        }, 500);
       } else {
         throw new Error('No token received from server');
       }
@@ -81,6 +96,9 @@ const Signin = () => {
 
   return (
     <div className="max-w-md w-full mx-auto p-8 bg-white rounded-lg shadow-lg">
+      {/* ToastContainer to display notifications */}
+      <ToastContainer />
+      
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold text-blue-600">EduTech</h1>
         <h2 className="text-xl font-semibold text-gray-800 mt-2">Sign in to your account</h2>
@@ -143,7 +161,7 @@ const Signin = () => {
           </label>
           <select
             id="role"
-            name="role" // Changed from userType to role
+            name="role"
             value={formData.role}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -165,8 +183,6 @@ const Signin = () => {
               Remember me
             </label>
           </div>
-          
-          
         </div>
         
         <div className="pt-2">

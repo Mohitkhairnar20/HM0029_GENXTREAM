@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, UserPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const SignupComponent = () => {
   const navigate = useNavigate();
@@ -70,12 +72,24 @@ const SignupComponent = () => {
         throw new Error(data.message || 'Failed to create account');
       }
       
+      // Show success toast
+      toast.success('Account created successfully! Redirecting to dashboard...', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+      
       // Store the JWT token in localStorage
       if (data.token) {
         localStorage.setItem('token', data.token);
         
-        // Navigate to dashboard
-        navigate('/dashboard');
+        // Small delay before redirecting so the user can see the toast
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1500);
       } else {
         throw new Error('No token received from server');
       }
@@ -93,6 +107,7 @@ const SignupComponent = () => {
 
   return (
     <div className="max-w-md w-full mx-auto p-8 bg-white rounded-lg shadow-lg">
+      <ToastContainer />
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold text-blue-600">EduTech</h1>
         <h2 className="text-xl font-semibold text-gray-800 mt-2">Create your account</h2>

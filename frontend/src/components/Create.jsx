@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Upload, Video, X, Check, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 // import { updateCategoryData } from '../../../backend/services/JourneyTracking';
 
 const Create = () => {
@@ -18,7 +20,6 @@ const Create = () => {
   const [videoName, setVideoName] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   // Predefined video types from backend
   const videoTypes = ["Course", "Tutorial", "Lecture"];
@@ -67,9 +68,7 @@ const Create = () => {
   };
 
   // Form submission
-  // In your Create.js component, update the handleSubmit function like this:
-
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validation
@@ -138,7 +137,16 @@ const handleSubmit = async (e) => {
         }
       });
       
-      setSuccess('Video uploaded successfully! It will be available after approval.');
+      // Show success toast notification
+      toast.success('Video uploaded successfully! It will be available after approval.', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+      
       setIsUploading(false);
       
       // Reset form after successful upload
@@ -161,6 +169,8 @@ const handleSubmit = async (e) => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg mt-8">
+      <ToastContainer />
+      
       <h1 className="text-3xl font-bold text-blue-700 mb-6 flex items-center">
         <Video className="w-8 h-8 mr-2" />
         Upload New Video
@@ -170,13 +180,6 @@ const handleSubmit = async (e) => {
         <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 flex items-start">
           <AlertTriangle className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
           <p>{error}</p>
-        </div>
-      )}
-      
-      {success && (
-        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 flex items-start">
-          <Check className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
-          <p>{success}</p>
         </div>
       )}
       
