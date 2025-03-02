@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 # Ignore .env in backend
 /backend/.env
+/frontend/dist
+/frontend/.vercel
