@@ -32,7 +32,7 @@ const Profile = () => {
         setLoading(true);
         
         // Fetch user stats from backend
-        const statsResponse = await axios.get(`http://localhost:3000/api/user-journey/stats/${userId}`);
+        const statsResponse = await axios.get(`https://hm0029-genxtream.onrender.com/api/user-journey/stats/${userId}`);
         
         // Process the data for the UI
         const processedData = {

@@ -32,7 +32,7 @@ const VideoDetail = () => {
     const fetchVideo = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:3000/api/videos/${id}`);
+        const response = await axios.get(`https://hm0029-genxtream.onrender.com/api/videos/${id}`);
         setVideo(response.data);
         document.title = response.data.title || 'Video Player';
       } catch (err) {
@@ -92,7 +92,7 @@ const VideoDetail = () => {
     const percentCompleted = calculatePercentCompleted();
 
     try {
-      await axios.post(`http://localhost:3000/api/user-journey/progress`, {
+      await axios.post(`https://hm0029-genxtream.onrender.com/api/user-journey/progress`, {
         videoId: id,
         watchDuration: Math.floor(watchDuration.current),
         percentCompleted,
@@ -111,7 +111,7 @@ const VideoDetail = () => {
     const percentCompleted = calculatePercentCompleted();
     
     try {
-      await axios.post(`http://localhost:3000/api/user-journey/complete`, {
+      await axios.post(`https://hm0029-genxtream.onrender.com/api/user-journey/complete`, {
         videoId: id,
         watchDuration: Math.floor(watchDuration.current),
         percentCompleted,
@@ -143,7 +143,7 @@ const VideoDetail = () => {
     }
     
     // Increment view count
-    fetch(`http://localhost:3000/api/videos/${id}/views`, {
+    fetch(`https://hm0029-genxtream.onrender.com/api/videos/${id}/views`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'

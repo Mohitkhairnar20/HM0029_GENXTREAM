@@ -15,7 +15,7 @@ const Main = () => {
     const fetchVideos = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:3000/api/videos');
+        const response = await axios.get('https://hm0029-genxtream.onrender.com/api/videos');
         setVideos(response.data);
         setError(null);
       } catch (err) {

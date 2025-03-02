@@ -17,7 +17,7 @@ const Admin = () => {
       try {
         setLoading(true);
         // Fetch unapproved videos by default
-        const response = await axios.get('http://localhost:3000/api/videos/not');
+        const response = await axios.get('https://hm0029-genxtream.onrender.com/api/videos/not');
         setVideos(response.data);
         setError(null);
       } catch (err) {
@@ -48,7 +48,7 @@ const Admin = () => {
   const handleApprove = async (id) => {
     try {
       setProcessingIds(prev => [...prev, id]);
-      await axios.put(`http://localhost:3000/api/videos/${id}/approve`);
+      await axios.put(`https://hm0029-genxtream.onrender.com/api/videos/${id}/approve`);
       // Remove the approved video from the list
       setVideos(videos.filter(video => video._id !== id));
       // Close preview if this video was being previewed
@@ -67,7 +67,7 @@ const Admin = () => {
   const handleDelete = async (id) => {
     try {
       setProcessingIds(prev => [...prev, id]);
-      await axios.delete(`http://localhost:3000/api/videos/${id}`);
+      await axios.delete(`https://hm0029-genxtream.onrender.com/api/videos/${id}`);
       // Remove the deleted video from the list
       setVideos(videos.filter(video => video._id !== id));
       // Close preview if this video was being previewed

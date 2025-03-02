@@ -130,7 +130,7 @@ const Create = () => {
         console.log(pair[0], pair[1]);
       }
       
-      const response = await axios.post('http://localhost:3000/api/videos/upload', uploadData, {
+      const response = await axios.post('https://hm0029-genxtream.onrender.com/api/videos/upload', uploadData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${token}`
