@@ -1,4 +1,4 @@
-# [HM0029] [GenXstream]
+
 # Educational Video Platform
 
 Welcome to the Educational Video Platform, a web application designed to provide users with access to approved educational video content. This platform allows users to sign up, sign in (as either a regular user or admin), watch videos, track their viewing habits, and upload educational content for approval. It also includes a personalized dashboard with visual progress tracking and an educational chatbot powered by the Groq API for resolving doubts.
